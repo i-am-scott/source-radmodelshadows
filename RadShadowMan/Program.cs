@@ -11,25 +11,22 @@ namespace RadShadowMan
         static readonly string kvMdlpattern = "[\"']model[\"']?(?<path>[\"'].+[\"'])";
         static readonly string kvVMFpattern = "[\"']file[\"']\\s+[\"'](?<path>.+)[\"']";
 
-        static List<string> ProcessReferncedVMFs(string relativePath, string fileContents)
+        static void ProcessReferncedVMFs(ref List<string> Files, string relativePath, string fileContents)
         {
             Regex rx = new Regex(kvVMFpattern, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
             MatchCollection matches = rx.Matches(fileContents);
             if (matches.Count == 0)
-                return null;
+                return;
 
-            List<string> files = new List<string>();
             foreach (Match match in matches)
             {
                 GroupCollection groups = match.Groups;
                 string path = groups["path"]?.Value;
-                if (string.IsNullOrWhiteSpace(path) || files.Contains(relativePath + "/" + path + ".vmf"))
+                if (string.IsNullOrWhiteSpace(path) || Files.Contains(relativePath + "/" + path + ".vmf"))
                     continue;
 
-                files.Add(relativePath + "/" + path + ".vmf");
+                Files.Add(relativePath + "/" + path + ".vmf");
             }
-
-            return files;
         }
 
         static void GetModels(string fileContents, ref List<string> Models)
@@ -72,9 +69,11 @@ namespace RadShadowMan
             if (fileContents == null)
                 return;
 
-            List<string> Files = ProcessReferncedVMFs(radFolder, fileContents);
+            List<string> Files = new List<string>();
             Files.Add(file);
 
+            ProcessReferncedVMFs(ref Files, radFolder, fileContents);
+  
             List<string> Models = new List<string>();
             foreach(string fn in Files)
             {
@@ -113,6 +112,10 @@ namespace RadShadowMan
 
         static void Main(string[] args)
         {
+
+#if DEBUG
+            ProcessFile("C:/Users/Scott/Desktop/mapsource/rp_liberator_sup_b7/rp_liberator_sup_b7c.vmf");
+#else
             if (args == null || args.Length == 0)
             {
                 Console.WriteLine("No argument given. Drag files or folders on this exe. or pass file/folder paths as arguments");
@@ -124,11 +127,12 @@ namespace RadShadowMan
                 string p = path.Replace("\"", "").Trim();
                 if (p.Substring(p.Length - 3) == "vmf")
                     ProcessFile(p);
-                else if(File.Exists(p + ".vmf"))
+                else if (File.Exists(p + ".vmf"))
                     ProcessFile(p + ".vmf");
                 else
                     RecurseCheck(p);
             }
+#endif
 
             Console.WriteLine("Rad files completed");
 
