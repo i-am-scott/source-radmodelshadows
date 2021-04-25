@@ -112,10 +112,6 @@ namespace RadShadowMan
 
         static void Main(string[] args)
         {
-
-#if DEBUG
-            ProcessFile("C:/Users/Scott/Desktop/mapsource/rp_liberator_sup_b7/rp_liberator_sup_b7c.vmf");
-#else
             if (args == null || args.Length == 0)
             {
                 Console.WriteLine("No argument given. Drag files or folders on this exe. or pass file/folder paths as arguments");
@@ -132,14 +128,8 @@ namespace RadShadowMan
                 else
                     RecurseCheck(p);
             }
-#endif
 
             Console.WriteLine("Rad files completed");
-
-#if DEBUG
-            Console.ReadLine();
-#endif
-
         }
     }
 }
